@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bandhan Bank App</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Oriya:wght@400;600;700&display=swap');
+
+        :root {
+            --bandhan-navy: #0A3152;
+            --bandhan-navy-light: #15456e;
+            --bandhan-red: #A71E1F;
+            --bandhan-orange: #EF3B23;
+            --bg-light: #F0F2F5;
+            --surface-white: #ffffff;
+        }
+
+        body {
+            font-family: 'Roboto', 'Noto Sans Devanagari', 'Noto Sans Bengali', 'Noto Sans Oriya', sans-serif;
+            background-color: #e5e7eb;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.98) translateY(5px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .view-animate {
+            animation: fadeInScale 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes pulse-soft {
+            0% { box-shadow: 0 0 0 0 rgba(239, 59, 35, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 59, 35, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 59, 35, 0); }
+        }
+
+        .voice-pulse {
+            animation: pulse-soft 2s infinite;
+        }
+
+        /* --- Components --- */
+        .header-gradient {
+            background: linear-gradient(160deg, var(--bandhan-navy) 0%, #06233d 100%);
+        }
+
+        /* Modern Card Styling */
+        .skeuo-card {
+            background: var(--surface-white);
+            border-radius: 1.25rem;
+            box-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.05),
+                0 10px 15px -3px rgba(0, 0, 0, 0.03),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+            border: 1px solid rgba(229, 231, 235, 0.5);
+        }
+
+        .skeuo-card:active {
+            transform: scale(0.97);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Glassmorphism Utilities */
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .glass-dark {
+            background: rgba(10, 49, 82, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        /* Beneficiary Selection */
+        .ben-avatar {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .ben-selected {
+            border-color: var(--bandhan-orange);
+            background-color: #fff8f8;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(239, 59, 35, 0.15);
+        }
+        
+        .ben-selected .check-icon {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Custom Scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Input styling */
+        .pin-dot {
+            transition: all 0.2s;
+        }
+        .pin-dot.filled {
+            background-color: var(--bandhan-navy);
+            transform: scale(1.2);
+        }
+
+        /* --- New Success Animation --- */
+        @keyframes scale-up-elastic {
+            0% { transform: scale(0); opacity: 0; }
+            60% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes ripple-out {
+            0% { transform: scale(0.8); opacity: 0.6; border-width: 4px; }
+            100% { transform: scale(2.5); opacity: 0; border-width: 0px; }
+        }
+        @keyframes dash {
+            0% { stroke-dashoffset: 100; }
+            100% { stroke-dashoffset: 0; }
+        }
+        
+        .anim-scale-up { animation: scale-up-elastic 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        .anim-ripple-1 { animation: ripple-out 2s infinite 0.2s; }
+        .anim-ripple-2 { animation: ripple-out 2s infinite 0.6s; }
+        
+        .success-checkmark {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            animation: dash 0.8s 0.3s ease-out forwards;
+        }
+
+        /* Analytics Chart */
+        .pie-chart {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #EF3B23 0% 35%,   /* Food */
+                #0A3152 35% 60%,  /* Bills */
+                #F59E0B 60% 85%,  /* Travel */
+                #10B981 85% 100%  /* Others */
+            );
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .pie-chart::after {
+            content: "";
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background: #F8F9FA;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body class="flex justify-center items-center min-h-screen bg-gray-200">
+
+    <!-- App Container -->
+    <div class="w-full max-w-md h-[100dvh] bg-[#F8F9FA] shadow-2xl relative flex flex-col overflow-hidden sm:rounded-[30px] sm:h-[95vh] sm:border-[8px] sm:border-gray-800">
+        
+        <!-- Header -->
+        <header class="header-gradient text-white pt-6 pb-6 px-6 rounded-b-[32px] shadow-lg relative z-20 shrink-0">
+            <!-- Top Row -->
+            <div class="flex justify-between items-start mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="bg-white p-1.5 rounded-full w-12 h-12 flex items-center justify-center shadow-lg transform rotate-3">
+                         <img src="C:\Users\anurag raj\Downloads\Bandhan Bank\Bandhan Bank Logo PNG Images (Transparent HD Photo Clipart).jpeg" alt="Bandhan Bank Logo" class="h-8 w-auto">
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold leading-tight tracking-wide drop-shadow-md">Bandhan Bank</h1>
+                        <p class="text-blue-100 text-[11px] font-medium opacity-90">Aapka Bhala, Sabki Bhalai</p>
+                    </div>
+                </div>
+                
+                <div onclick="toggleOfflineMode()" id="statusBadge" class="glass px-3 py-1.5 rounded-full flex items-center gap-2 cursor-pointer active:bg-white/20 transition group">
+                    <div id="statusDot" class="w-2.5 h-2.5 bg-green-400 rounded-full shadow-[0_0_8px_rgba(74,222,128,0.6)] group-hover:animate-pulse"></div>
+                    <span id="txt-status" class="text-xs font-semibold tracking-wide">Online</span>
+                </div>
+            </div>
+
+            <!-- Profile & SOS -->
+            <div class="flex justify-between items-end">
+                <!-- Profile Switcher -->
+                <div class="relative z-50">
+                    <button onclick="toggleProfileDropdown()" class="glass flex items-center gap-3 px-3 py-2 rounded-xl active:scale-95 transition hover:bg-white/20">
+                        <div class="w-9 h-9 bg-gradient-to-br from-[#EF3B23] to-[#c92d18] rounded-full flex items-center justify-center text-white text-xs shrink-0 shadow-md border border-white/30">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="flex flex-col items-start">
+                            <span id="txt-profile-label" class="text-[9px] text-blue-100 font-bold uppercase tracking-wider">Profile</span>
+                            <span id="profileName" class="text-sm font-bold text-white leading-none">Raju</span>
+                        </div>
+                        <i class="fas fa-chevron-down text-blue-100 text-xs ml-1"></i>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <div id="profileDropdown" class="hidden absolute top-full left-0 mt-3 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-[60] transform origin-top-left transition-all duration-200">
+                        <div class="bg-gray-50 px-4 py-2 border-b border-gray-100">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Switch Account</span>
+                        </div>
+                        <div onclick="initiateProfileSwitch('Raju')" class="px-4 py-3 hover:bg-blue-50 cursor-pointer flex items-center gap-3 border-b border-gray-50 transition-colors">
+                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-[#0A3152] text-xs font-bold">R</div>
+                            <div>
+                                <p class="text-sm font-bold text-gray-800">Raju</p>
+                                <p class="text-[10px] text-gray-500">Savings ••••9921</p>
+                            </div>
+                        </div>
+                        <div onclick="initiateProfileSwitch('Sita')" class="px-4 py-3 hover:bg-pink-50 cursor-pointer flex items-center gap-3 border-b border-gray-50 transition-colors">
+                            <div class="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center text-pink-600 text-xs font-bold">S</div>
+                            <div>
+                                <p class="text-sm font-bold text-gray-800">Sita</p>
+                                <p class="text-[10px] text-gray-500">Savings ••••3311</p>
+                            </div>
+                        </div>
+                        <div onclick="initiateProfileSwitch('Papa')" class="px-4 py-3 hover:bg-green-50 cursor-pointer flex items-center gap-3 transition-colors">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-xs font-bold">P</div>
+                            <div>
+                                <p class="text-sm font-bold text-gray-800">Papa</p>
+                                <p class="text-[10px] text-gray-500">Pension ••••7788</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SOS Button -->
+                <button onclick="showSosView()" class="bg-[#A71E1F] text-white px-4 py-2.5 rounded-xl border border-red-400/30 flex items-center gap-2 font-bold text-sm shadow-lg shadow-red-900/20 active:bg-red-800 active:scale-95 transition group">
+                    <div class="bg-white/20 rounded-full w-6 h-6 flex items-center justify-center group-hover:animate-ping absolute opacity-30"></div>
+                    <i class="fas fa-phone-alt animate-pulse"></i> 
+                    <span class="text-xs tracking-wide">SOS Help</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Language Bar -->
+        <div class="px-6 -mt-5 relative z-30">
+            <div class="bg-white p-1.5 rounded-2xl shadow-lg border border-gray-100 flex justify-between items-center gap-1">
+                <button onclick="changeLanguage('English')" class="flex-1 py-2 text-[10px] font-bold rounded-xl transition-all shadow-md bg-[#0A3152] text-white" id="btn-lang-en">English</button>
+                <button onclick="changeLanguage('Hindi')" class="flex-1 py-2 text-[10px] font-bold rounded-xl transition-all text-gray-500 hover:bg-gray-50" id="btn-lang-hi">हिन्दी</button>
+                <button onclick="changeLanguage('Bengali')" class="flex-1 py-2 text-[10px] font-bold rounded-xl transition-all text-gray-500 hover:bg-gray-50" id="btn-lang-bn">বাংলা</button>
+                <button onclick="changeLanguage('Odia')" class="flex-1 py-2 text-[10px] font-bold rounded-xl transition-all text-gray-500 hover:bg-gray-50" id="btn-lang-or">ଓଡିଆ</button>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <main id="mainContent" class="flex-1 px-6 pt-6 pb-28 overflow-y-auto no-scrollbar relative z-0">
+
+            <!-- HOME VIEW -->
+            <div id="view-home" class="view-animate flex flex-col gap-4">
+                
+                <div onclick="showBalanceView()" class="skeuo-card p-5 flex items-center gap-5 cursor-pointer group active:bg-gray-50">
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-50 to-green-100 rounded-2xl flex items-center justify-center shadow-inner">
+                        <i class="fas fa-wallet text-2xl text-green-600 transform group-hover:scale-110 transition"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 id="txt-card1-title" class="text-lg font-bold text-[#0A3152]">Check Balance</h3>
+                        <p id="txt-card1-sub" class="text-xs font-medium text-gray-500 mt-1">View Money</p>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
+                        <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                    </div>
+                </div>
+
+                <div onclick="showPassbookView()" class="skeuo-card p-5 flex items-center gap-5 cursor-pointer group active:bg-gray-50 relative overflow-hidden">
+                    <div id="offlineTag" class="hidden absolute top-0 right-0 bg-gray-200/80 backdrop-blur text-gray-600 text-[8px] px-2 py-1 rounded-bl-lg font-bold tracking-wider border-l border-b border-white">OFFLINE</div>
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl flex items-center justify-center shadow-inner">
+                        <i class="fas fa-book-open text-2xl text-[#0A3152] transform group-hover:scale-110 transition"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 id="txt-card2-title" class="text-lg font-bold text-[#0A3152]">Passbook</h3>
+                        <p id="txt-card2-sub" class="text-xs font-medium text-gray-500 mt-1">Past Transactions</p>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
+                        <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                    </div>
+                </div>
+
+                <div onclick="showSendMoneyView()" class="skeuo-card p-5 flex items-center gap-5 cursor-pointer group active:bg-gray-50">
+                    <div class="w-16 h-16 bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl flex items-center justify-center shadow-inner">
+                        <i class="fas fa-paper-plane text-2xl text-[#EF3B23] transform group-hover:-translate-y-1 group-hover:translate-x-1 transition"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 id="txt-card3-title" class="text-lg font-bold text-[#0A3152]">Send Money</h3>
+                        <p id="txt-card3-sub" class="text-xs font-medium text-gray-500 mt-1">Transfer to others</p>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
+                        <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BALANCE VIEW -->
+            <div id="view-balance" class="hidden flex-col gap-6">
+                <button onclick="showHomeView()" class="self-start flex items-center text-[#0A3152] font-bold text-sm bg-white px-4 py-2 rounded-full shadow-sm active:scale-95 transition">
+                    <i class="fas fa-arrow-left mr-2"></i> <span id="txt-back-bal">Back</span>
+                </button>
+                
+                <div class="bg-gradient-to-br from-[#0A3152] to-[#15456e] text-white w-full rounded-3xl p-8 shadow-2xl relative overflow-hidden border border-white/10 group">
+                    <div class="absolute -right-12 -top-12 w-40 h-40 bg-[#EF3B23] rounded-full blur-[60px] opacity-30 group-hover:opacity-40 transition duration-700"></div>
+                    <div class="absolute -left-12 bottom-0 w-32 h-32 bg-[#A71E1F] rounded-full blur-[50px] opacity-20"></div>
+                    
+                    <p id="txt-avail-bal" class="text-blue-200 text-xs font-bold uppercase tracking-widest mb-1">Available Balance</p>
+                    <div class="flex items-baseline gap-1 mb-8">
+                        <span class="text-3xl opacity-60 font-medium">₹</span> 
+                        <span id="displayBalance" class="text-5xl font-bold tracking-tight">5,400.00</span> 
+                    </div>
+                    
+                    <div class="flex items-center justify-between border-t border-white/10 pt-4">
+                        <div class="flex items-center gap-2 text-[10px] text-blue-200">
+                            <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span> <span id="txt-live-upd">Live Update</span>
+                        </div>
+                        <img src="C:\Users\anurag raj\Downloads\Bandhan Bank\Bandhan Bank Logo PNG Images (Transparent HD Photo Clipart).jpeg" class="h-4 opacity-50 brightness-0 invert" alt="">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="showStatementView()" class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center gap-3 active:scale-95 transition hover:shadow-md">
+                        <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600"><i class="fas fa-file-download"></i></div>
+                        <span id="txt-stmt" class="text-xs font-bold text-gray-700">Statement</span>
+                    </button>
+                    <button onclick="showAnalyticsView()" class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center gap-3 active:scale-95 transition hover:shadow-md">
+                        <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-[#EF3B23]"><i class="fas fa-chart-pie"></i></div>
+                        <span id="txt-analytics" class="text-xs font-bold text-gray-700">Analytics</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STATEMENT VIEW (NEW) -->
+            <div id="view-statement" class="hidden flex-col gap-6">
+                <button onclick="showBalanceView()" class="self-start flex items-center text-[#0A3152] font-bold text-sm bg-white px-4 py-2 rounded-full shadow-sm active:scale-95 transition">
+                    <i class="fas fa-arrow-left mr-2"></i> <span id="txt-back-stmt">Back</span>
+                </button>
+                
+                <h3 id="txt-stmt-header" class="text-xl font-bold text-[#0A3152] px-1">Account Statement</h3>
+                
+                <div class="bg-white rounded-3xl shadow-sm p-6 flex flex-col gap-4">
+                    <p id="txt-stmt-select" class="text-xs font-bold text-gray-400 uppercase">Select Period</p>
+                    <div class="flex gap-3">
+                        <select class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-[#0A3152] outline-none">
+                            <option>October 2023</option>
+                            <option>September 2023</option>
+                            <option>August 2023</option>
+                        </select>
+                    </div>
+                    
+                    <button onclick="showToast('Statement Downloaded')" class="mt-2 bg-[#0A3152] text-white py-4 rounded-xl font-bold text-sm shadow-lg flex items-center justify-center gap-2 active:scale-95 transition">
+                        <i class="fas fa-file-pdf"></i> <span id="txt-btn-download">Download PDF</span>
+                    </button>
+                </div>
+                
+                <div class="flex flex-col gap-3">
+                    <p class="text-xs font-bold text-gray-400 uppercase px-1">Recent Downloads</p>
+                    <div class="bg-white rounded-2xl p-4 flex items-center justify-between shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-file-alt text-red-500 text-xl"></i>
+                            <div>
+                                <p class="text-sm font-bold text-[#0A3152]">Sept_2023.pdf</p>
+                                <p class="text-[10px] text-gray-400">120 KB • 01 Oct</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-download text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ANALYTICS VIEW (NEW) -->
+            <div id="view-analytics" class="hidden flex-col gap-6">
+                <button onclick="showBalanceView()" class="self-start flex items-center text-[#0A3152] font-bold text-sm bg-white px-4 py-2 rounded-full shadow-sm active:scale-95 transition">
+                    <i class="fas fa-arrow-left mr-2"></i> <span id="txt-back-analytics">Back</span>
+                </button>
+                
+                <h3 id="txt-analytics-header" class="text-xl font-bold text-[#0A3152] px-1">Spend Analysis</h3>
+
+                <!-- Chart Container -->
+                <div class="bg-white rounded-[2rem] p-8 shadow-sm flex flex-col items-center justify-center relative">
+                    <div class="pie-chart mb-6">
+                        <div class="absolute flex flex-col items-center">
+                            <span class="text-[10px] text-gray-400 font-bold uppercase">Total</span>
+                            <span class="text-xl font-bold text-[#0A3152]">₹12k</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-center gap-4 w-full">
+                        <div class="flex items-center gap-1.5 text-[10px] font-bold text-gray-600"><span class="w-2 h-2 rounded-full bg-[#EF3B23]"></span> Food</div>
+                        <div class="flex items-center gap-1.5 text-[10px] font-bold text-gray-600"><span class="w-2 h-2 rounded-full bg-[#0A3152]"></span> Bills</div>
+                        <div class="flex items-center gap-1.5 text-[10px] font-bold text-gray-600"><span class="w-2 h-2 rounded-full bg-[#F59E0B]"></span> Travel</div>
+                    </div>
+                </div>
+
+                <!-- Breakdown List -->
+                <div class="flex flex-col gap-3 pb-6">
+                    <p class="text-xs font-bold text-gray-400 uppercase px-1">Category Breakdown</p>
+                    
+                    <div class="bg-white p-4 rounded-2xl shadow-sm flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-[#EF3B23]"><i class="fas fa-utensils"></i></div>
+                            <div>
+                                <p class="text-sm font-bold text-[#0A3152]">Food & Dining</p>
+                                <div class="w-24 h-1.5 bg-gray-100 rounded-full mt-1.5 overflow-hidden">
+                                    <div class="h-full bg-[#EF3B23] w-[35%]"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="text-sm font-bold text-[#0A3152]">₹4,200</span>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl shadow-sm flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-[#0A3152]"><i class="fas fa-bolt"></i></div>
+                            <div>
+                                <p class="text-sm font-bold text-[#0A3152]">Utility Bills</p>
+                                <div class="w-24 h-1.5 bg-gray-100 rounded-full mt-1.5 overflow-hidden">
+                                    <div class="h-full bg-[#0A3152] w-[25%]"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="text-sm font-bold text-[#0A3152]">₹3,000</span>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl shadow-sm flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-600"><i class="fas fa-gas-pump"></i></div>
+                            <div>
+                                <p class="text-sm font-bold text-[#0A3152]">Travel</p>
+                                <div class="w-24 h-1.5 bg-gray-100 rounded-full mt-1.5 overflow-hidden">
+                                    <div class="h-full bg-[#F59E0B] w-[25%]"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="text-sm font-bold text-[#0A3152]">₹3,000</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASSBOOK VIEW -->
+            <div id="view-passbook" class="hidden flex-col gap-4">
+                <div class="flex items-center gap-4 mb-2">
+                    <button onclick="showHomeView()" class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm active:scale-90 transition text-[#0A3152]">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h3 id="txt-passbook-header" class="text-xl font-bold text-[#0A3152]">Passbook</h3>
+                </div>
+                
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden min-h-[50vh]" id="txnList">
+                    <!-- Dynamic Transactions -->
+                </div>
+            </div>
+
+            <!-- SEND MONEY VIEW -->
+            <div id="view-send" class="hidden flex-col gap-6">
+                <button onclick="showHomeView()" class="self-start flex items-center text-[#0A3152] font-bold text-sm bg-white px-4 py-2 rounded-full shadow-sm active:scale-95 transition">
+                    <i class="fas fa-arrow-left mr-2"></i> <span id="txt-back-send">Back</span>
+                </button>
+                
+                <!-- Amount Input -->
+                <div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 text-center relative overflow-hidden">
+                    <p id="txt-enter-amt" class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-4">Entering Amount</p>
+                    <div class="flex items-center justify-center gap-2">
+                        <span class="text-3xl font-bold text-gray-400">₹</span>
+                        <input id="sendAmount" type="number" inputmode="numeric" class="w-48 text-5xl font-bold text-[#0A3152] text-center outline-none bg-transparent placeholder-gray-200" placeholder="0">
+                    </div>
+                    <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#EF3B23] to-transparent opacity-50"></div>
+                </div>
+
+                <!-- Beneficiary Grid -->
+                <div>
+                    <div class="flex justify-between items-end mb-4 px-1">
+                        <p id="txt-send-to" class="text-sm font-bold text-[#0A3152]">Send to</p>
+                        <button id="txt-view-all" class="text-[10px] font-bold text-[#EF3B23] uppercase tracking-wide">View All</button>
+                    </div>
+                    <div class="grid grid-cols-4 gap-3" id="benGrid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <button onclick="initiatePayment()" class="mt-auto bg-[#EF3B23] hover:bg-[#d12c15] text-white w-full py-4 rounded-2xl font-bold text-lg shadow-xl shadow-orange-500/20 active:scale-95 transition flex items-center justify-center gap-2">
+                    <span id="txt-btn-send">Send Money</span> <i class="fas fa-arrow-right text-sm"></i>
+                </button>
+            </div>
+
+            <!-- SUCCESS VIEW (NEW ANIMATION) -->
+            <div id="view-success" class="hidden flex-col items-center justify-center h-full pt-4 relative">
+                <!-- Close Button -->
+                <button onclick="showHomeView()" class="absolute top-0 right-0 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-200 transition">
+                    <i class="fas fa-times"></i>
+                </button>
+
+                <div class="relative mb-8 mt-4 flex items-center justify-center">
+                    <!-- Ripple Effects -->
+                    <div class="absolute w-32 h-32 border-4 border-green-200 rounded-full anim-ripple-1 opacity-0"></div>
+                    <div class="absolute w-32 h-32 border-4 border-green-200 rounded-full anim-ripple-2 opacity-0"></div>
+                    
+                    <!-- Main Circle -->
+                    <div class="w-24 h-24 bg-gradient-to-tr from-green-400 to-emerald-600 rounded-full flex items-center justify-center shadow-xl shadow-green-200 anim-scale-up relative z-10">
+                        <svg class="w-12 h-12 text-white" viewBox="0 0 52 52">
+                            <path class="success-checkmark" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                        </svg>
+                    </div>
+                </div>
+                
+                <h2 class="text-2xl font-bold text-[#0A3152] mb-1">Payment Successful!</h2>
+                <p class="text-gray-400 text-xs font-medium mb-8">Transaction ID: <span id="successTxnId" class="font-mono text-gray-600">88293041</span></p>
+                
+                <!-- Receipt Ticket -->
+                <div class="bg-white w-full rounded-2xl shadow-xl overflow-hidden relative">
+                    <!-- Ticket Punch Holes -->
+                    <div class="absolute -left-3 top-24 w-6 h-6 bg-[#F0F2F5] rounded-full"></div>
+                    <div class="absolute -right-3 top-24 w-6 h-6 bg-[#F0F2F5] rounded-full"></div>
+                    
+                    <div class="bg-[#0A3152] p-6 text-center text-white relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                        <p class="text-[10px] font-bold uppercase tracking-widest opacity-70 mb-1">Total Amount</p>
+                        <h3 id="successAmountDisplay" class="text-4xl font-bold">₹ 500</h3>
+                    </div>
+                    
+                    <div class="p-6 pt-8">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 shrink-0">
+                                <i class="fas fa-user text-lg"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-400 font-bold uppercase">Paid To</p>
+                                <p id="successBen" class="font-bold text-[#0A3152] text-lg leading-tight">Kirana Store</p>
+                                <p id="successBenBank" class="text-xs text-gray-500">Bandhan Bank ••••4582</p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between py-4 border-t border-dashed border-gray-200">
+                            <div>
+                                <p class="text-[10px] text-gray-400 font-bold uppercase">Date</p>
+                                <p id="successDate" class="text-sm font-bold text-gray-700">Oct 12, 2023</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[10px] text-gray-400 font-bold uppercase">Time</p>
+                                <p id="successTime" class="text-sm font-bold text-gray-700">10:45 AM</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 w-full mt-8">
+                    <button onclick="shareReceipt()" class="flex-1 bg-white border-2 border-gray-100 text-[#0A3152] py-3.5 rounded-2xl font-bold text-sm shadow-sm active:scale-95 transition flex items-center justify-center gap-2 hover:bg-gray-50">
+                        <i class="fas fa-share-alt"></i> Share
+                    </button>
+                    <button onclick="showHomeView()" class="flex-1 bg-[#0A3152] text-white py-3.5 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition hover:bg-[#15456e]">Done</button>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Voice Button (Floating) -->
+        <div class="absolute right-6 bottom-6 z-40 flex flex-col items-center">
+            <button onclick="activateVoice()" id="voiceBtn" class="w-16 h-16 bg-[#EF3B23] rounded-full shadow-[0_8px_30px_rgba(239,59,35,0.4)] flex items-center justify-center text-white text-2xl voice-pulse active:scale-90 transition-transform hover:bg-[#d12c15] relative overflow-hidden group">
+                <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition"></div>
+                <i class="fas fa-microphone relative z-10"></i>
+            </button>
+            <div class="mt-3 bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg">
+                 <p id="txt-tap-speak" class="text-[10px] font-bold text-white tracking-wide">Tap to Speak</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="absolute bottom-0 w-full bg-white/80 backdrop-blur-md border-t border-white/50 p-3 pb-6 flex justify-between px-8 text-[10px] font-medium z-10">
+            <div class="flex items-center gap-1.5 text-green-700 bg-green-50/80 px-2 py-1 rounded-md border border-green-100">
+                <i class="fas fa-shield-alt"></i> <span id="txt-device-verified" class="font-bold">Verified Device</span>
+            </div>
+            <div class="flex items-center gap-1 text-gray-400">
+                v2.1 <i class="fas fa-wifi text-[8px]"></i>
+            </div>
+        </div>
+
+        <!-- SOS OVERLAY -->
+        <div id="view-sos" class="hidden fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center h-full w-full">
+             <div class="w-full max-w-md h-full flex flex-col items-center justify-center relative overflow-hidden bg-red-50">
+                
+                <!-- Radar Animation -->
+                <div class="absolute w-[600px] h-[600px] border border-red-200 rounded-full animate-[ping_3s_infinite] opacity-50"></div>
+                <div class="absolute w-[400px] h-[400px] border border-red-300 rounded-full animate-[ping_3s_infinite_1s] opacity-50"></div>
+                
+                <div class="z-10 flex flex-col items-center mb-16 relative">
+                    <div class="w-40 h-40 bg-white border-8 border-red-100 rounded-full flex items-center justify-center mb-8 shadow-2xl animate-pulse">
+                         <img src="C:\Users\anurag raj\Downloads\Bandhan Bank\Bandhan Bank Logo PNG Images (Transparent HD Photo Clipart).jpeg"
+alt="Logo" class="h-20 w-auto">
+                    </div>
+                    
+                    <h2 class="text-lg font-bold text-red-400 mb-2 uppercase tracking-widest">Emergency Call</h2>
+                    <h1 class="text-4xl font-black text-[#0A3152] mb-2">Bandhan Saathi</h1>
+                    <p class="text-3xl font-bold text-[#EF3B23]">1800 258 8181</p>
+                </div>
+                
+                <div class="z-10 mt-8 flex flex-col items-center gap-6 w-full px-10">
+                    <button onclick="endSosCall()" class="w-full py-5 bg-[#A71E1F] rounded-2xl flex items-center justify-center gap-3 text-white shadow-xl hover:bg-red-800 transition transform active:scale-95">
+                        <i class="fas fa-phone-slash text-xl"></i>
+                        <span class="font-bold text-lg">Cancel Call</span>
+                    </button>
+                    <p class="text-xs text-gray-500 text-center max-w-xs">Location sharing is enabled automatically during emergency calls.</p>
+                </div>
+             </div>
+        </div>
+
+        <!-- PIN Modal -->
+        <div id="pinModal" class="hidden absolute inset-0 bg-[#0A3152]/60 backdrop-blur-sm z-[200] flex items-center justify-center p-6">
+            <div class="bg-white w-full max-w-xs rounded-[32px] p-8 shadow-2xl flex flex-col items-center relative transform transition-all scale-100">
+                <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-6 text-[#0A3152] shadow-inner">
+                    <i class="fas fa-fingerprint text-3xl"></i>
+                </div>
+                <h3 id="pinTitle" class="text-xl font-bold text-[#0A3152] mb-2">Enter PIN</h3>
+                <p id="pinSub" class="text-xs text-gray-500 mb-8 text-center px-4 leading-relaxed">Please verify your identity to proceed</p>
+                
+                <div class="w-full relative mb-8">
+                    <input type="password" id="pinInput" maxlength="4" class="w-full text-center text-4xl tracking-[0.5em] font-bold border-b-2 border-gray-200 focus:border-[#EF3B23] outline-none py-2 text-[#0A3152] bg-transparent transition-colors" placeholder="••••">
+                </div>
+                
+                <div class="flex gap-4 w-full">
+                    <button onclick="closePinModal()" class="flex-1 py-3 text-gray-500 font-bold text-sm bg-gray-50 rounded-xl hover:bg-gray-100 transition">Cancel</button>
+                    <button id="pinActionBtn" onclick="verifyPin()" class="flex-1 bg-[#0A3152] text-white py-3 rounded-xl font-bold text-sm shadow-lg active:scale-95 transition">Verify</button>
+                </div>
+                
+                <div id="pinError" class="absolute -bottom-12 bg-[#A71E1F] text-white px-4 py-2 rounded-full text-xs font-bold shadow-lg hidden items-center gap-2 animate-bounce">
+                    <i class="fas fa-exclamation-circle"></i> Incorrect PIN. Try 1111.
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast -->
+        <div id="toast" class="absolute top-24 left-1/2 transform -translate-x-1/2 glass-dark text-white px-6 py-3 rounded-full text-xs font-bold shadow-2xl opacity-0 transition-all duration-300 pointer-events-none z-[300] flex items-center gap-3 whitespace-nowrap border border-white/10 translate-y-[-20px]">
+            <i class="fas fa-info-circle text-[#EF3B23]"></i> 
+            <span id="toastMsg">Notification</span>
+        </div>
+
+    </div>
+
+    <!-- Logic Script (Preserved and linked to new IDs) -->
+    <script>
+        // Data & Translations
+        const translations = {
+            'English': {
+                // Home
+                card1Title: "Check Balance", card1Sub: "View Money",
+                card2Title: "Passbook", card2Sub: "Past Transactions",
+                card3Title: "Send Money", card3Sub: "Transfer to others",
+                tapSpeak: "Tap to Speak", profileLabel: "Profile",
+                statusOnline: "Online", statusOffline: "Offline",
+                listening: "Listening...", recognized: "Recognized!",
+                balancePhrase: "Balance is",
+                // Inner Pages
+                back: "Back",
+                availBal: "Available Balance",
+                liveUpd: "Live Update",
+                stmt: "Statement",
+                analytics: "Analytics",
+                passHeader: "Passbook",
+                enterAmt: "Entering Amount",
+                sendTo: "Send to",
+                viewAll: "View All",
+                btnSend: "Send Money",
+                // Statement & Analytics
+                stmtHeader: "Account Statement",
+                stmtSelect: "Select Period",
+                btnDownload: "Download PDF",
+                analyticsHeader: "Spend Analysis"
+            },
+            'Hindi': {
+                // Home
+                card1Title: "बैलेंस चेक करें", card1Sub: "पैसे देखें",
+                card2Title: "पासबुक", card2Sub: "पिछले लेनदेन",
+                card3Title: "पैसे भेजें", card3Sub: "दूसरों को भेजें",
+                tapSpeak: "बोलने के लिए दबाएं", profileLabel: "प्रोफाइल",
+                statusOnline: "ऑनलाइन", statusOffline: "ऑफलाइन",
+                listening: "सुन रहा हूँ...", recognized: "पहचान लिया!",
+                balancePhrase: "आपका बैलेंस है",
+                // Inner Pages
+                back: "वापस",
+                availBal: "उपलब्ध राशि",
+                liveUpd: "लाइव अपडेट",
+                stmt: "स्टेटमेंट",
+                analytics: "विश्लेषण",
+                passHeader: "पासबुक",
+                enterAmt: "राशि दर्ज करें",
+                sendTo: "किन्हें भेजें",
+                viewAll: "सभी देखें",
+                btnSend: "पैसे भेजें",
+                // Statement & Analytics
+                stmtHeader: "खाता विवरण",
+                stmtSelect: "अवधि चुनें",
+                btnDownload: "पीडीएफ डाउनलोड",
+                analyticsHeader: "खर्च विश्लेषण"
+            },
+            'Bengali': {
+                // Home
+                card1Title: "ব্যালেন্স চেক", card1Sub: "টাকা দেখুন",
+                card2Title: "পাসবুক", card2Sub: "লেনদেন দেখুন",
+                card3Title: "টাকা পাঠান", card3Sub: "অন্যদের পাঠান",
+                tapSpeak: "বলতে ট্যাপ করুন", profileLabel: "প্রোফাইল",
+                statusOnline: "অনলাইন", statusOffline: "অফলাইন",
+                listening: "শুনছি...", recognized: "চিনতে পেরেছি!",
+                balancePhrase: "আপনার ব্যালেন্স",
+                // Inner Pages
+                back: "ফিরে যান",
+                availBal: "উপলব্ধ ব্যালেন্স",
+                liveUpd: "লাইভ আপডেট",
+                stmt: "বিবরণী",
+                analytics: "বিশ্লেষণ",
+                passHeader: "পাসবুক",
+                enterAmt: "টাকার পরিমাণ",
+                sendTo: "কাকে পাঠাবেন",
+                viewAll: "সব দেখুন",
+                btnSend: "টাকা পাঠান",
+                // Statement & Analytics
+                stmtHeader: "অ্যাকাউন্ট স্টেটমেন্ট",
+                stmtSelect: "সময়কাল নির্বাচন করুন",
+                btnDownload: "পিডিএফ ডাউনলোড",
+                analyticsHeader: "খরচ বিশ্লেষণ"
+            },
+            'Odia': {
+                // Home
+                card1Title: "ବାଲାନ୍ସ ଦେଖନ୍ତୁ", card1Sub: "ଟଙ୍କା ଦେଖନ୍ତୁ",
+                card2Title: "ପାସବୁକ୍", card2Sub: "ପୂର୍ବ କାରବାର",
+                card3Title: "ଟଙ୍କା ପଠାନ୍ତୁ", card3Sub: "ପଠାନ୍ତୁ",
+                tapSpeak: "କହିବାକୁ ଦବାନ୍ତୁ", profileLabel: "ପ୍ରୋଫାଇଲ୍",
+                statusOnline: "ଅନ୍‌ଲାଇନ୍", statusOffline: "ଅଫ୍‌ଲାଇନ୍",
+                listening: "ଶୁଣୁଛି...", recognized: "ଚିହ୍ନିପାରିଲି!",
+                balancePhrase: "ଆପଣଙ୍କ ବାଲାନ୍ସ",
+                // Inner Pages
+                back: "ଫେରନ୍ତୁ",
+                availBal: "ଉପଲବ୍ଧ ବାଲାନ୍ସ",
+                liveUpd: "ଲାଇଭ୍ ଅପଡେଟ୍",
+                stmt: "ବିବରଣୀ",
+                analytics: "ବିଶ୍ଳେଷଣ",
+                passHeader: "ପାସବୁକ୍",
+                enterAmt: "ରାଶି ଦର୍ଜ କରନ୍ତୁ",
+                sendTo: "ପଠାନ୍ତୁ",
+                viewAll: "ସମସ୍ତ ଦେଖନ୍ତୁ",
+                btnSend: "ଟଙ୍କା ପଠାନ୍ତୁ",
+                // Statement & Analytics
+                stmtHeader: "ଖାତା ବିବରଣୀ",
+                stmtSelect: "ସମୟ ସୀମା ବାଛନ୍ତୁ",
+                btnDownload: "ଡାଉନଲୋଡ୍ କରନ୍ତୁ",
+                analyticsHeader: "ଖର୍ଚ୍ଚ ବିଶ୍ଳେଷଣ"
+            }
+        };
+
+        const profileData = {
+            'Raju': {
+                balance: '5,400.00',
+                transactions: [
+                    { name: 'Kirana Store', amount: '- ₹250', date: 'Today, 10:30 AM', color: 'red', icon: 'store' },
+                    { name: 'Govt Subsidy', amount: '+ ₹2,000', date: 'Yesterday', color: 'green', icon: 'landmark' },
+                    { name: 'Recharge', amount: '- ₹199', date: '2 days ago', color: 'red', icon: 'mobile-alt' },
+                    { name: 'Transfer', amount: '- ₹500', date: '4 days ago', color: 'red', icon: 'paper-plane' }
+                ],
+                beneficiaries: [
+                    { name: 'Wife', fullName: 'Wife', bank: 'SBI', acc: 'XXXX8822', icon: 'home', color: 'pink' },
+                    { name: 'Shop', fullName: 'Shyam Kirana', bank: 'Bandhan', acc: 'XXXX4582', icon: 'store', color: 'orange' },
+                    { name: 'Ramesh', fullName: 'Ramesh Kumar', bank: 'PNB', acc: 'XXXX1234', icon: 'user-friends', color: 'blue' }
+                ]
+            },
+            'Sita': {
+                balance: '12,150.00',
+                transactions: [
+                    { name: 'Milk', amount: '+ ₹500', date: 'Today, 8:00 AM', color: 'green', icon: 'tint' },
+                    { name: 'School', amount: '- ₹800', date: 'Yesterday', color: 'red', icon: 'graduation-cap' }
+                ],
+                beneficiaries: [
+                    { name: 'Husband', fullName: 'Raju', bank: 'Bandhan', acc: 'XXXX9921', icon: 'user-tie', color: 'blue' },
+                    { name: 'School', fullName: 'Village School', bank: 'SBI', acc: 'XXXX3311', icon: 'school', color: 'yellow' }
+                ]
+            },
+            'Papa': {
+                balance: '45,000.00',
+                transactions: [
+                    { name: 'Pension', amount: '+ ₹5,000', date: '1st Oct', color: 'green', icon: 'hand-holding-usd' },
+                    { name: 'Meds', amount: '- ₹450', date: '3 days ago', color: 'red', icon: 'pills' }
+                ],
+                beneficiaries: [
+                    { name: 'Son', fullName: 'Raju', bank: 'Bandhan', acc: 'XXXX9921', icon: 'child', color: 'blue' },
+                    { name: 'Clinic', fullName: 'City Clinic', bank: 'HDFC', acc: 'XXXX7788', icon: 'clinic-medical', color: 'green' }
+                ]
+            }
+        };
+
+        // State
+        let currentLang = 'English';
+        let isOffline = false;
+        let currentProfile = 'Raju';
+        let pendingProfile = null;
+        let selectedBen = null;
+        let paymentAmount = 0;
+        let isPaymentMode = false;
+
+        // Init
+        renderUI();
+
+        function renderUI() {
+            const data = profileData[currentProfile];
+            document.getElementById('displayBalance').innerText = data.balance;
+            document.getElementById('profileName').innerText = currentProfile;
+
+            // Transactions
+            const txnList = document.getElementById('txnList');
+            txnList.innerHTML = '';
+            data.transactions.forEach(t => {
+                const isCred = t.color === 'green';
+                txnList.innerHTML += `
+                    <div class="p-5 border-b border-gray-50 flex justify-between items-center hover:bg-gray-50 transition">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 ${isCred ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'} rounded-full flex items-center justify-center">
+                                <i class="fas fa-${t.icon}"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold text-gray-800">${t.name}</h4>
+                                <p class="text-[10px] text-gray-400 font-medium">${t.date}</p>
+                            </div>
+                        </div>
+                        <span class="text-sm font-bold ${isCred ? 'text-green-600' : 'text-[#A71E1F]'}">${t.amount}</span>
+                    </div>
+                `;
+            });
+
+            // Beneficiaries
+            const benGrid = document.getElementById('benGrid');
+            benGrid.innerHTML = '';
+            data.beneficiaries.forEach(b => {
+                benGrid.innerHTML += `
+                    <div onclick="selectBen(this, '${b.fullName}', '${b.bank}', '${b.acc}')" class="ben-avatar bg-white border border-gray-100 p-3 rounded-2xl flex flex-col items-center gap-2 cursor-pointer relative shadow-sm hover:shadow-md">
+                        <div class="w-10 h-10 bg-${b.color}-50 text-${b.color}-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-${b.icon}"></i>
+                        </div>
+                        <span class="text-[10px] font-bold text-gray-600 truncate w-full text-center">${b.name}</span>
+                        <div class="check-icon absolute top-[-5px] right-[-5px] bg-[#EF3B23] text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] opacity-0 transition transform scale-0 border-2 border-white"><i class="fas fa-check"></i></div>
+                    </div>
+                `;
+            });
+            benGrid.innerHTML += `
+                <div class="bg-gray-50 border-2 border-dashed border-gray-200 p-3 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer opacity-60 hover:opacity-100 transition">
+                    <i class="fas fa-plus text-gray-400"></i>
+                    <span class="text-[10px] font-bold text-gray-400">Add</span>
+                </div>
+            `;
+        }
+
+        // Navigation (with simple transition handling)
+        function showView(viewId) {
+            const views = ['view-home', 'view-balance', 'view-passbook', 'view-send', 'view-success', 'view-sos', 'view-statement', 'view-analytics'];
+            views.forEach(id => {
+                const el = document.getElementById(id);
+                if(id === viewId) {
+                    el.classList.remove('hidden');
+                    el.classList.add('view-animate');
+                    // Remove animation class after it plays so it can replay later if needed
+                    setTimeout(() => el.classList.remove('view-animate'), 500);
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+        }
+
+        function showHomeView() { showView('view-home'); }
+        function showBalanceView() { showView('view-balance'); }
+        function showPassbookView() { showView('view-passbook'); }
+        function showStatementView() { showView('view-statement'); }
+        function showAnalyticsView() { showView('view-analytics'); }
+        function showSosView() { showView('view-sos'); }
+        function endSosCall() { showHomeView(); }
+        
+        function showSendMoneyView() {
+            showView('view-send');
+            document.getElementById('sendAmount').value = '';
+            selectedBen = null;
+            document.querySelectorAll('.ben-avatar').forEach(el => el.classList.remove('ben-selected'));
+        }
+
+        // Features
+        function toggleProfileDropdown() {
+            document.getElementById('profileDropdown').classList.toggle('hidden');
+        }
+
+        function initiateProfileSwitch(name) {
+            pendingProfile = name;
+            isPaymentMode = false;
+            document.getElementById('profileDropdown').classList.add('hidden');
+            openPinModal(`Switch to ${name}?`, "Verify identity");
+        }
+
+        function toggleOfflineMode() {
+            isOffline = !isOffline;
+            const badge = document.getElementById('statusDot');
+            const txt = document.getElementById('txt-status');
+            if(isOffline) {
+                badge.className = "w-2.5 h-2.5 bg-gray-400 rounded-full";
+                txt.innerText = translations[currentLang].statusOffline;
+                document.getElementById('offlineTag').classList.remove('hidden');
+                showToast("Offline Mode Active");
+            } else {
+                badge.className = "w-2.5 h-2.5 bg-green-400 rounded-full shadow-[0_0_8px_rgba(74,222,128,0.6)] animate-pulse";
+                txt.innerText = translations[currentLang].statusOnline;
+                document.getElementById('offlineTag').classList.add('hidden');
+                showToast("Back Online");
+            }
+        }
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
+            
+            // Text Updates
+            document.getElementById('txt-card1-title').innerText = t.card1Title;
+            document.getElementById('txt-card1-sub').innerText = t.card1Sub;
+            document.getElementById('txt-card2-title').innerText = t.card2Title;
+            document.getElementById('txt-card2-sub').innerText = t.card2Sub;
+            document.getElementById('txt-card3-title').innerText = t.card3Title;
+            document.getElementById('txt-card3-sub').innerText = t.card3Sub;
+            document.getElementById('txt-tap-speak').innerText = t.tapSpeak;
+            document.getElementById('txt-profile-label').innerText = t.profileLabel;
+            document.getElementById('txt-status').innerText = isOffline ? t.statusOffline : t.statusOnline;
+
+            // Inner Page Updates
+            document.getElementById('txt-back-bal').innerText = t.back;
+            document.getElementById('txt-avail-bal').innerText = t.availBal;
+            document.getElementById('txt-live-upd').innerText = t.liveUpd;
+            document.getElementById('txt-stmt').innerText = t.stmt;
+            document.getElementById('txt-analytics').innerText = t.analytics;
+            
+            document.getElementById('txt-passbook-header').innerText = t.passHeader;
+
+            document.getElementById('txt-back-send').innerText = t.back;
+            document.getElementById('txt-enter-amt').innerText = t.enterAmt;
+            document.getElementById('txt-send-to').innerText = t.sendTo;
+            document.getElementById('txt-view-all').innerText = t.viewAll;
+            document.getElementById('txt-btn-send').innerText = t.btnSend;
+
+            // New Pages
+            document.getElementById('txt-back-stmt').innerText = t.back;
+            document.getElementById('txt-stmt-header').innerText = t.stmtHeader;
+            document.getElementById('txt-stmt-select').innerText = t.stmtSelect;
+            document.getElementById('txt-btn-download').innerText = t.btnDownload;
+
+            document.getElementById('txt-back-analytics').innerText = t.back;
+            document.getElementById('txt-analytics-header').innerText = t.analyticsHeader;
+
+
+            // Buttons
+            ['en','hi','bn','or'].forEach(k => {
+                const btn = document.getElementById(`btn-lang-${k}`);
+                btn.className = "flex-1 py-2 text-[10px] font-bold rounded-xl transition-all text-gray-500 hover:bg-gray-50";
+            });
+            const activeKey = lang === 'English' ? 'en' : lang === 'Hindi' ? 'hi' : lang === 'Bengali' ? 'bn' : 'or';
+            document.getElementById(`btn-lang-${activeKey}`).className = "flex-1 py-2 text-[10px] font-bold rounded-xl transition-all shadow-md bg-[#0A3152] text-white";
+            
+            showToast(`Language: ${lang}`);
+        }
+
+        function selectBen(el, name, bank, acc) {
+            document.querySelectorAll('.ben-avatar').forEach(d => d.classList.remove('ben-selected'));
+            el.classList.add('ben-selected');
+            selectedBen = { name, bank, acc };
+        }
+
+        function initiatePayment() {
+            const amt = document.getElementById('sendAmount').value;
+            if(!amt || amt <= 0) return showToast("Enter valid amount");
+            if(!selectedBen) return showToast("Select a beneficiary");
+            
+            paymentAmount = amt;
+            isPaymentMode = true;
+            openPinModal(`Pay ₹${amt}`, `To ${selectedBen.name}`);
+        }
+
+        // PIN Logic
+        function openPinModal(title, sub) {
+            document.getElementById('pinTitle').innerText = title;
+            document.getElementById('pinSub').innerText = sub;
+            document.getElementById('pinModal').classList.remove('hidden');
+            document.getElementById('pinInput').value = '';
+            document.getElementById('pinInput').focus();
+            document.getElementById('pinError').classList.add('hidden');
+        }
+
+        function closePinModal() {
+            document.getElementById('pinModal').classList.add('hidden');
+        }
+
+        function verifyPin() {
+            const pin = document.getElementById('pinInput').value;
+            if(pin === '1111') {
+                closePinModal();
+                if(isPaymentMode) {
+                    // Success View Populate
+                    document.getElementById('successAmountDisplay').innerText = `₹ ${paymentAmount}`;
+                    document.getElementById('successBen').innerText = selectedBen.name;
+                    document.getElementById('successBenBank').innerText = `${selectedBen.bank} • ${selectedBen.acc}`;
+                    document.getElementById('successDate').innerText = new Date().toLocaleDateString();
+                    document.getElementById('successTime').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    
+                    // Specific Animation reset
+                    const checkmark = document.querySelector('.success-checkmark');
+                    if (checkmark) {
+                       checkmark.style.animation = 'none';
+                       void checkmark.offsetHeight; /* trigger reflow */
+                       checkmark.style.animation = null; 
+                    }
+                    
+                    // Reset animations for bubbles
+                    const bubbles = document.querySelectorAll('.anim-scale-up, .anim-ripple-1, .anim-ripple-2');
+                    bubbles.forEach(el => {
+                        el.style.animation = 'none';
+                        void el.offsetHeight;
+                        el.style.animation = null;
+                    });
+                    
+                    showView('view-success');
+                } else {
+                    currentProfile = pendingProfile;
+                    renderUI();
+                    showToast(`Welcome ${currentProfile}`);
+                }
+            } else {
+                const err = document.getElementById('pinError');
+                err.classList.remove('hidden');
+                err.classList.add('flex');
+            }
+        }
+
+        // Utils
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('opacity-0', 'translate-y-[-20px]');
+            toast.classList.add('translate-y-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-[-20px]');
+                toast.classList.remove('translate-y-0');
+            }, 3000);
+        }
+
+        function activateVoice() {
+            showToast(translations[currentLang].listening);
+            document.getElementById('voiceBtn').classList.add('scale-110');
+            setTimeout(() => {
+                showToast(translations[currentLang].recognized);
+                document.getElementById('voiceBtn').classList.remove('scale-110');
+                showBalanceView();
+            }, 1500);
+        }
+
+        function shareReceipt() {
+             showToast("Receipt Shared via WhatsApp");
+        }
+    </script>
+</body>
+</html>
